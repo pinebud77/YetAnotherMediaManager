@@ -582,9 +582,9 @@ class MediaManager(wx.Frame):
                 wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d)' % (file_count, total))
                 for t in thread_list:
                     t.join()
-                    for mf in in_process:
-                        self.add_mediafile(mf)
-                    in_process = []
+                for mf in in_process:
+                    self.add_mediafile(mf)
+                in_process = []
                 self.filesList.Thaw()
                 thread_list = []
                 wx.Yield()

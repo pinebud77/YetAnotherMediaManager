@@ -7,7 +7,7 @@ from catalog import Catalog
 
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 679
+VERSION_MINOR = 680
 
 
 def wmain(yamm_file=None):
