@@ -62,6 +62,15 @@ sql_insert_version = """INSERT INTO version (id, major, minor)
                         VALUES(0, ?, ?);
                      """
 
+def commit_wait(conn):
+    done = False
+
+    while not done:
+        try:
+            conn.commit()
+            done = True
+        except sqlite3.OperationalError:
+            pass
 
 def set_app_version(conn, major, minor):
     c = conn.cursor()
@@ -73,7 +82,7 @@ def set_app_version(conn, major, minor):
     else:
         c.execute(sql_insert_version, (major, minor,))
 
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_create_topdir_table = """CREATE TABLE IF NOT EXISTS topdir (
@@ -87,7 +96,7 @@ sql_create_topdir_table = """CREATE TABLE IF NOT EXISTS topdir (
 def create_topdir_list(conn):
     c = conn.cursor()
     c.execute(sql_create_topdir_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_topdir = """SELECT id, path, comment, exclude FROM topdir;"""
@@ -124,7 +133,7 @@ def add_topdir(conn, topdir):
     c = conn.cursor()
     try:
         c.execute(sql_insert_topdir, (topdir.abspath, topdir.comment, topdir.exclude))
-        conn.commit()
+        commit_wait(conn)
     except sqlite3.IntegrityError:
         pass
 
@@ -137,7 +146,7 @@ sql_delete_topdir = """DELETE FROM topdir
 def del_topdir(conn, abspath):
     c = conn.cursor()
     c.execute(sql_delete_topdir, (abspath,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_update_topdir = """UPDATE topdir
@@ -149,7 +158,7 @@ sql_update_topdir = """UPDATE topdir
 def update_topdir(conn, oripath, newpath):
     c = conn.cursor()
     c.execute(sql_update_topdir, (newpath, oripath,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_create_file_table = """CREATE TABLE IF NOT EXISTS file (
@@ -174,7 +183,7 @@ sql_create_file_table = """CREATE TABLE IF NOT EXISTS file (
 def create_file_table(conn):
     c = conn.cursor()
     c.execute(sql_create_file_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_file = """SELECT id, topdir_id, reldir, filename, size, time, lastplay, duration, comment, width, height
@@ -217,7 +226,7 @@ def update_file(conn, mf):
                                 mf.height,
                                 mf.id,
                                 ))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_file_id = """SELECT id
@@ -272,8 +281,7 @@ sql_create_thumbnail_table = """CREATE TABLE IF NOT EXISTS thumbnail (
 def create_thumbnail_table(conn):
     c = conn.cursor()
     c.execute(sql_create_thumbnail_table)
-    conn.commit()
-
+    commit_wait(conn)
 
 sql_add_thumbnail = """INSERT INTO thumbnail (file_id, time, jpg)
                        VALUES(?, ?, ?);
@@ -286,7 +294,7 @@ def add_thumbnails(conn, file_id, thumb_list):
         time = thumb[0]
         jpg = thumb[1]
         c.execute(sql_add_thumbnail, (file_id, time, jpg,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_thumbnails = """SELECT time, jpg, id
@@ -315,7 +323,7 @@ sql_del_thumbnails = """DELETE FROM thumbnail
 def del_thumbnails(conn, file_id):
     c = conn.cursor()
     c.execute(sql_del_thumbnails, (file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_thumbnail_from_id = """SELECT id, file_id, time, jpg
@@ -344,7 +352,7 @@ sql_create_cover_table = """CREATE TABLE IF NOT EXISTS cover (
 def create_cover_table(conn):
     c = conn.cursor()
     c.execute(sql_create_cover_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_del_cover = """DELETE FROM cover
@@ -354,7 +362,7 @@ sql_del_cover = """DELETE FROM cover
 def del_cover(conn, file_id):
     c = conn.cursor()
     c.execute(sql_del_cover, (file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_add_cover = """INSERT INTO cover (file_id, cover)
@@ -364,7 +372,7 @@ sql_add_cover = """INSERT INTO cover (file_id, cover)
 def add_cover(conn, file_id, jpg):
     c = conn.cursor()
     c.execute(sql_add_cover, (file_id, jpg,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_cover_list = """SELECT *
@@ -399,7 +407,7 @@ sql_create_actor_table = """CREATE TABLE IF NOT EXISTS actor (
 def create_actor_table(conn):
     c = conn.cursor()
     c.execute(sql_create_actor_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_del_actor = """DELETE FROM actor
@@ -409,7 +417,7 @@ sql_del_actor = """DELETE FROM actor
 def del_actor(conn, name):
     c = conn.cursor()
     c.execute(sql_del_actor, (name,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_add_actor = """INSERT INTO actor (name, picture, bio, comment)
@@ -419,7 +427,7 @@ sql_add_actor = """INSERT INTO actor (name, picture, bio, comment)
 def add_actor(conn, name, picture=None, bio=None, comment=None):
     c = conn.cursor()
     c.execute(sql_add_actor, (name, picture, bio, comment))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_modify_actor = """UPDATE actor
@@ -430,7 +438,7 @@ sql_modify_actor = """UPDATE actor
 def modify_actor(conn, name, new_name, picture=None, bio=None, comment=None):
     c = conn.cursor()
     c.execute(sql_modify_actor, (new_name, picture, bio, comment, name,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_actor = """SELECT name, picture, comment, bio, comment
@@ -483,7 +491,7 @@ sql_create_actorfile_table = """CREATE TABLE IF NOT EXISTS actorfile (
 def create_actorfile_table(conn):
     c = conn.cursor()
     c.execute(sql_create_actorfile_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_add_actorfile = """INSERT INTO actorfile (actor_id, file_id)
@@ -493,7 +501,7 @@ sql_add_actorfile = """INSERT INTO actorfile (actor_id, file_id)
 def add_actorfile(conn, actor_id, file_id):
     c = conn.cursor()
     c.execute(sql_add_actorfile, (actor_id, file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_del_actorfile = """DELETE FROM actorfile
@@ -503,7 +511,7 @@ sql_del_actorfile = """DELETE FROM actorfile
 def del_actorfile(conn, actor_id, file_id):
     c = conn.cursor()
     c.execute(sql_del_actorfile, (actor_id, file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_actorfile = """SELECT actor_id, file_id
@@ -528,7 +536,7 @@ sql_create_tag_table = """CREATE TABLE IF NOT EXISTS tag(
 def create_tag_table(conn):
     c = conn.cursor()
     c.execute(sql_create_tag_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_add_tag = """INSERT INTO tag (tag, file_id)
@@ -538,7 +546,7 @@ sql_add_tag = """INSERT INTO tag (tag, file_id)
 def add_tag(conn, tag, file_id):
     c = conn.cursor()
     c.execute(sql_add_tag, (tag, file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_del_tag = """DELETE FROM tag
@@ -548,7 +556,7 @@ sql_del_tag = """DELETE FROM tag
 def del_tag(conn, tag, file_id):
     c = conn.cursor()
     c.execute(sql_del_tag, (tag, file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_tag= """SELECT tag, file_id
@@ -569,7 +577,7 @@ sql_modify_tag = """UPDATE tag
 def modify_tag(conn, file_id, orig_tag, new_tag):
     c = conn.cursor()
     c.execute(sql_modify_tag, (new_tag, orig_tag, file_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_create_favorite_table = """CREATE TABLE IF NOT EXISTS favorite(
@@ -588,7 +596,7 @@ sql_create_favorite_table = """CREATE TABLE IF NOT EXISTS favorite(
 def create_favorite_table(conn):
     c = conn.cursor()
     c.execute(sql_create_favorite_table)
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_add_favorite = """INSERT INTO favorite (file_id, thumb_id)
@@ -598,7 +606,7 @@ sql_add_favorite = """INSERT INTO favorite (file_id, thumb_id)
 def add_favorite(conn, file_id, thumb_id):
     c = conn.cursor()
     c.execute(sql_add_favorite, (file_id, thumb_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_favorite_list = """SELECT id, file_id, thumb_id
@@ -624,7 +632,7 @@ sql_delete_favorite = """DELETE FROM favorite
 def del_favorite(conn, fav_id):
     c = conn.cursor()
     c.execute(sql_delete_favorite, (fav_id,))
-    conn.commit()
+    commit_wait(conn)
 
 
 sql_get_favorite_id = """SELECT id
