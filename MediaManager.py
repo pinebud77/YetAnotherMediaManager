@@ -819,18 +819,23 @@ class MediaManager(wx.Frame):
 
     def sort_resolution(self, item1, item2):
         mf1, mf2 = self.sort_get_mf(item1, item2)
-        if not (mf1.width and mf1.height):
-            mf1_size = None
-        elif mf1.width > mf1.height:
-            mf1_size = mf1.width
-        else:
-            mf1_size = mf1.height
-        if not (mf2.width and mf2.height):
-            mf1_size = None
-        elif mf2.width > mf2.height:
-            mf2_size = mf2.width
-        else:
-            mf2_size = mf2.height
+        mf1_size = None
+        mf2_size = None
+
+        if mf1.width and mf1.height:
+            if mf1.width > mf1.height:
+                mf1_size = mf1.width
+            else:
+                mf1_size = mf1.height
+
+        if mf2.width and mf2.height:
+            if mf2.width > mf2.height:
+                mf2_size = mf2.width
+            else:
+                mf2_size = mf2.height
+
+        if (not mf1_size) and (not mf2_size):
+            return 0
         if (not mf1_size) and mf2_size:
             return -self.sort_positive
         if mf1_size and (not mf2_size):
