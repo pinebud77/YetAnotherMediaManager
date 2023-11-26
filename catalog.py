@@ -377,8 +377,6 @@ class Catalog(list):
             self.db_conn.commit()
 
         cpu_count = multiprocessing.cpu_count()
-        if cpu_count > 4:
-            cpu_count = 4
         total = len(add_db_list)
         count = 0
         thread_list = []

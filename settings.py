@@ -19,6 +19,7 @@
 import json
 import os
 import os.path
+import platform
 from pathlib import Path
 
 DEF_SETTINGS_FILENAME = '.yamm_settings'
@@ -67,10 +68,16 @@ DEF_THUMBNAIL_WIDTH = 360
 DEF_THUMBNAIL_HEIGHT = 203
 DEF_STREAM_PERIOD = 90
 
-#open directives : currently set for PotPlayer
-DEF_OPEN_EXE = 'C:\\Program Files\\DAUM\\PotPlayer\\PotPlayerMini64.exe'
-DEF_OPEN_FILE = '%s'
-DEF_OPEN_SEEK = '/seek=%d'
+if platform.system == 'Windows':
+    #open directives : currently set for PotPlayer
+    DEF_OPEN_EXE = 'C:\\Program Files\\DAUM\\PotPlayer\\PotPlayerMini64.exe'
+    DEF_OPEN_FILE = '%s'
+    DEF_OPEN_SEEK = '/seek=%d'
+else:
+    DEF_OPEN_EXE = '/Applications/VLC.app/Contents/MacOS/VLC'
+    DEF_OPEN_FILE = '%s'
+    DEF_OPEN_SEEK = '--start-time=%d'
+
 
 contents_comment_text = '''view_contents: files or favorites'''
 type_comment_text = '''view_type: small, medium or large'''

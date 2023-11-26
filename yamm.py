@@ -2,20 +2,23 @@ import os
 import logging
 import sys
 import getopt
+import platform
 
-try:
-    os.environ['IMAGEIO_FFMPEG_EXE'] = os.path.join(sys._MEIPASS, 'imageio_ffmpeg', 'binaries',
-                                                    'ffmpeg-win64-v4.2.2.exe')
-except AttributeError:
-    pass
+if platform.system() == 'Windows':
+    try:
+        os.environ['IMAGEIO_FFMPEG_EXE'] = os.path.join(sys._MEIPASS, 'imageio_ffmpeg', 'binaries',
+                                                        'ffmpeg-win64-v4.2.2.exe')
+    except AttributeError:
+        pass
+elif platform.system() == 'Darwin':
+    os.environ['IMAGEIO_FFMPEG_EXE'] = '/opt/homebrew/bin/ffmpeg'
 
-import imageio_ffmpeg
 from settings import *
 from catalog import Catalog
 
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 701
+VERSION_MINOR = 800
 
 
 def wmain(yamm_file=None):

@@ -17,8 +17,8 @@
 
 import os
 import subprocess
-import sys
 import wx
+import wx.lib.agw.ultimatelistctrl as ULC
 import io
 import threading
 import datetime
@@ -26,7 +26,6 @@ import logging
 import requests
 import webbrowser
 import tempfile
-import urllib.request
 import copy
 import threading
 import multiprocessing
@@ -211,18 +210,9 @@ class MediaManager(wx.Frame):
         ihbox.Add(self.ascendChoice, 0)
         ivbox.Add(ihbox, 0, wx.EXPAND)
 
-        filesList = wx.ListCtrl(self, style=wx.LC_ICON |
-                                            wx.BORDER_SUNKEN |
-                                            wx.LC_AUTOARRANGE |
-                                            wx.NO_FULL_REPAINT_ON_RESIZE |
-                                            wx.CLIP_CHILDREN |
-                                            wx.LC_EDIT_LABELS)
+        filesList = ULC.UltimateListCtrl(self, agwStyle=ULC.ULC_ICON |
+                                                        ULC.ULC_EDIT_LABELS)
         filesList.SetDoubleBuffered(True)
-        filesList.InsertColumn(0, 'thumbnail', width=360)
-        filesList.InsertColumn(1, 'filename', width=200)
-        filesList.InsertColumn(2, 'size', width=100)
-        filesList.InsertColumn(3, 'duration', width=100)
-        filesList.InsertColumn(4, 'path', width=360)
         ivbox.Add(filesList, 1, flag=wx.ALL|wx.EXPAND)
         hbox.Add(ivbox, 1, wx.EXPAND)
         if self.view_type == SMALL_THUMBNAILS:
@@ -296,7 +286,7 @@ class MediaManager(wx.Frame):
         self.Centre()
 
         logging.info('Yet Another Media Manager v%d.%d' % (VERSION_MAJOR, VERSION_MINOR))
-        self.check_version()
+        #self.check_version()
 
     def check_version(self):
         r = requests.get(RELEASE_URL + '/latest')
@@ -466,17 +456,19 @@ class MediaManager(wx.Frame):
                 self.favorites.append(fav)
                 fav.view_index = self.favorites.index(fav)
 
+        item = ULC.UltimateListItem()
+        item.SetAlign(wx.LIST_FORMAT_CENTER)
+
         if self.view_contents == VIEW_FILES:
-            item = wx.ListItem()
             item.SetId(mf.view_index)
             item.SetText(mf.filename)
             if mf.imagelist_index is not None:
                 item.SetImage(mf.imagelist_index)
             item.SetData(mf.view_index)
+            print(mf.view_index)
             self.filesList.InsertItem(item)
         else:
             for fav in mf.favorites:
-                item = wx.ListItem()
                 item.SetId(fav.view_index)
                 item.SetText(mf.filename)
                 if fav.imagelist_index is not None:
@@ -555,21 +547,18 @@ class MediaManager(wx.Frame):
         thread_count = multiprocessing.cpu_count()
         update_period = update_period // thread_count
         if not thread_count:
-            thread_count = 1
+            thread_count = 4
         thread_list = []
-        args = []
         in_process = []
         file_count = 0
+
+        args = []
         for file in self.files:
             file_count += 1
             in_process.append(file)
-            if self.view_contents == VIEW_FILES and file.imagelist_index is None:
-                args.append(file)
-            if self.view_contents == VIEW_FAVORITES:
-                for fav in file.favorites:
-                    if fav.imagelist_index is None:
-                        args.append(file)
-                        break
+            if self.view_contents == VIEW_FILES:
+                if file.imagelist_index is None:
+                    args.append(file)
             if len(args) < update_period and file != self.files[-1]:
                 continue
             t = threading.Thread(target=self.mediaicon_create_func, args=(args,))
@@ -578,14 +567,14 @@ class MediaManager(wx.Frame):
             args = []
 
             if len(thread_list) == thread_count or file == self.files[-1]:
-                self.filesList.Freeze()
                 wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d)' % (file_count, total))
                 for t in thread_list:
                     t.join()
+                self.filesList.Freeze()
                 for mf in in_process:
                     self.add_mediafile(mf)
-                in_process = []
                 self.filesList.Thaw()
+                in_process = []
                 thread_list = []
                 wx.Yield()
         wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d' % (total, total))
