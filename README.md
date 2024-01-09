@@ -62,4 +62,4 @@ On Windows machine
 
 
 current picture
-![current pic](https://github.com/pinebud77/YetAnotherMediaManager_public/blob/main/yamm.png)
+![current pic](https://github.com/pinebud77/YetAnotherMediaManager/blob/main/yamm.png)

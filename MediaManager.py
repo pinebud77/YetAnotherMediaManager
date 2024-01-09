@@ -465,7 +465,6 @@ class MediaManager(wx.Frame):
             if mf.imagelist_index is not None:
                 item.SetImage(mf.imagelist_index)
             item.SetData(mf.view_index)
-            print(mf.view_index)
             self.filesList.InsertItem(item)
         else:
             for fav in mf.favorites:
@@ -556,9 +555,13 @@ class MediaManager(wx.Frame):
         for file in self.files:
             file_count += 1
             in_process.append(file)
-            if self.view_contents == VIEW_FILES:
-                if file.imagelist_index is None:
-                    args.append(file)
+            if self.view_contents == VIEW_FILES and file.imagelist_index is None:
+                args.append(file)
+            if self.view_contents == VIEW_FAVORITES:
+                for fav in file.favorites:
+                    if fav.imagelist_index is None:
+                        args.append(file)
+                        break
             if len(args) < update_period and file != self.files[-1]:
                 continue
             t = threading.Thread(target=self.mediaicon_create_func, args=(args,))
@@ -567,7 +570,6 @@ class MediaManager(wx.Frame):
             args = []
 
             if len(thread_list) == thread_count or file == self.files[-1]:
-                wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d)' % (file_count, total))
                 for t in thread_list:
                     t.join()
                 self.filesList.Freeze()
@@ -576,6 +578,7 @@ class MediaManager(wx.Frame):
                 self.filesList.Thaw()
                 in_process = []
                 thread_list = []
+                wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d)' % (file_count, total))
                 wx.Yield()
         wx.CallAfter(self.statusbar.SetStatusText, 'files loaded (%d/%d' % (total, total))
         self.OnSortChange(None)
