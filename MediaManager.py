@@ -210,8 +210,7 @@ class MediaManager(wx.Frame):
         ihbox.Add(self.ascendChoice, 0)
         ivbox.Add(ihbox, 0, wx.EXPAND)
 
-        filesList = ULC.UltimateListCtrl(self, agwStyle=ULC.ULC_ICON |
-                                                        ULC.ULC_EDIT_LABELS)
+        filesList = ULC.UltimateListCtrl(self, agwStyle=ULC.ULC_ICON | ULC.ULC_EDIT_LABELS | ULC.ULC_SINGLE_SEL)
         filesList.SetDoubleBuffered(True)
         ivbox.Add(filesList, 1, flag=wx.ALL|wx.EXPAND)
         hbox.Add(ivbox, 1, wx.EXPAND)
