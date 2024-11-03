@@ -463,6 +463,8 @@ class MediaManager(wx.Frame):
             item.SetText(mf.filename)
             if mf.imagelist_index is not None:
                 item.SetImage(mf.imagelist_index)
+            if mf.have_subtitle:
+                item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
             item.SetData(mf.view_index)
             self.filesList.InsertItem(item)
         else:
@@ -471,6 +473,8 @@ class MediaManager(wx.Frame):
                 item.SetText(mf.filename)
                 if fav.imagelist_index is not None:
                     item.SetImage(fav.imagelist_index)
+                if mf.have_subtitle:
+                    item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
                 item.SetData(fav.view_index)
                 self.filesList.InsertItem(item)
 

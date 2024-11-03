@@ -62,6 +62,7 @@ DEF_MEDIUM_RESOLUTION = (240, 136)
 
 #mediafile settings
 DEF_FILE_EXTENSION = ('mkv', 'avi', 'mp4', 'asf', 'wmv', 'flv')
+DEF_SUBTITLE_EXTENSION = ('sup', 'smi', 'ass', 'srt')
 DEF_MIN_IMAGE_COUNT = 5
 DEF_MAX_IMAGE_COUNT = 40
 DEF_THUMBNAIL_WIDTH = 360
@@ -97,6 +98,7 @@ def load_settings():
     global DEF_SORT_ASCEND
     global DEF_THUMBS_HEIGHT
     global DEF_FILE_EXTENSION
+    global DEF_SUBTITLE_EXTENSION
     global DEF_MIN_IMAGE_COUNT
     global DEF_MAX_IMAGE_COUNT
     global DEF_THUMBNAIL_WIDTH
@@ -115,6 +117,7 @@ def load_settings():
         DEF_SORT_ASCEND = d['sort_ascend']
         DEF_THUMBS_HEIGHT = d['thumbs_height']
         DEF_FILE_EXTENSION = d['file_extention']
+        DEF_SUBTITLE_EXTENSION = d['subtitle_extention']
         DEF_MIN_IMAGE_COUNT = d['min_image_count']
         DEF_MAX_IMAGE_COUNT = d['max_image_count']
         DEF_THUMBNAIL_WIDTH = d['thumbnail_width']
@@ -138,6 +141,7 @@ def store_settings():
     global DEF_SORT_ASCEND
     global DEF_THUMBS_HEIGHT
     global DEF_FILE_EXTENSION
+    global DEF_SUBTITLE_EXTENSION
     global DEF_MIN_IMAGE_COUNT
     global DEF_MAX_IMAGE_COUNT
     global DEF_THUMBNAIL_WIDTH
@@ -158,6 +162,7 @@ def store_settings():
     d['sort_ascend'] = DEF_SORT_ASCEND
     d['thumbs_height'] = DEF_THUMBS_HEIGHT
     d['file_extention'] = DEF_FILE_EXTENSION
+    d['subtitle_extention'] = DEF_SUBTITLE_EXTENSION
     d['min_image_count'] = DEF_MIN_IMAGE_COUNT
     d['max_image_count'] = DEF_MAX_IMAGE_COUNT
     d['thumbnail_width'] = DEF_THUMBNAIL_WIDTH

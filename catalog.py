@@ -21,7 +21,6 @@ import os.path
 import glob
 import logging
 import sqlite3
-import datetime
 import re
 import threading
 import multiprocessing
@@ -52,7 +51,7 @@ class DbVersionException(Exception):
 
 
 class Catalog(list):
-    def __init__(self, db_abspath, extension_list=DEF_FILE_EXTENSION):
+    def __init__(self, db_abspath, extension_list=DEF_FILE_EXTENSION, subtitleext_list=DEF_SUBTITLE_EXTENSION):
         super(Catalog, self).__init__()
 
         self.filepath = db_abspath
@@ -61,6 +60,8 @@ class Catalog(list):
         self.actor_list = []
         self.db_conn = None
         self.extension_list = extension_list
+        self.subtitleext_list = subtitleext_list
+        self.subtitle_files = []
         self.kill_thread = False
         self.thread_files = []
 
@@ -152,6 +153,9 @@ class Catalog(list):
                 fav = media_file.Favorite(mf, thumb[2], fav[0], thumb_id)
                 fav.jpg = thumb[3]
                 mf.favorites.append(fav)
+        
+        #mark files with subtitles
+        self.check_subtitles()
 
     def add_actor(self, name):
         if name in self.actor_list:
@@ -286,14 +290,15 @@ class Catalog(list):
         for only_db in only_db_list:
             db_utils.del_topdir(self.db_conn, only_db[1])
 
-    def in_extension_list(self, filename, ext_list):
+    def in_extension_list(self, ext_list, filename):
         for ext in ext_list:
             if filename.lower().endswith(ext):
                 return True
         return False
 
     def get_dir_filelist(self, topdir, ext_list, msg_cb=None):
-        msg_cb('processing directory : %s' % topdir)
+        if msg_cb:
+            msg_cb('processing directory : %s' % topdir)
 
         new_filelist = []
         try:
@@ -307,16 +312,24 @@ class Catalog(list):
             path = os.path.join(topdir, name)
             abspath = os.path.abspath(path)
             if os.path.isfile(abspath):
-                if not self.in_extension_list(name, ext_list):
-                    continue
-                new_filelist.append(abspath)
+                if self.in_extension_list(ext_list, name):
+                    new_filelist.append(abspath)
             if os.path.isdir(abspath):
-                add_files = self.get_dir_filelist(path, ext_list, msg_cb=msg_cb)
-                new_filelist.extend(add_files)
+                add_media = self.get_dir_filelist(path, ext_list, msg_cb=msg_cb)
+                new_filelist.extend(add_media)
 
         return new_filelist
 
-    def sync_files(self, msg_cb=None):
+    def check_subtitles(self):
+        self.subtitle_files = []
+        for topdir in self.topdir_list:
+            if not os.path.exists(topdir.abspath):
+                continue
+            sub_list = self.get_dir_filelist(topdir.abspath, self.subtitleext_list)
+            self.subtitle_files.extend(sub_list)
+        self.mark_subtitle()
+
+    def sync_files(self, ext_list, msg_cb=None):
         add_db_list = []
         del_db_list = []
 
@@ -325,7 +338,7 @@ class Catalog(list):
                 logging.warning('topdir is not accessible.. ignoring..')
                 msg_cb('topdir is not accessible.. ignoring %s' % topdir.abspath)
                 continue
-            fs_list = self.get_dir_filelist(topdir.abspath, self.extension_list, msg_cb=msg_cb)
+            fs_list = self.get_dir_filelist(topdir.abspath, ext_list, msg_cb=msg_cb)
             if self.kill_thread:
                 return
 
@@ -465,9 +478,29 @@ class Catalog(list):
             mf.thumbnails = None
             self.append(mf)
 
+    def mark_subtitle(self):
+        self.sort(key=get_abspath)
+        self.subtitle_files.sort()
+        mf_i = 0
+        sub_i = 0
+        while True:
+            if len(self) == mf_i or len(self.subtitle_files) == sub_i:
+                break
+            mf_path = '.'.join(self[mf_i].abspath.split('.')[:-1])
+            sub_path = '.'.join(self.subtitle_files[sub_i].split('.')[:-1])
+            if mf_path == sub_path:
+                self[mf_i].have_subtitle = True
+                mf_i += 1 
+                sub_i += 1
+            elif mf_path < sub_path:
+                mf_i += 1
+            else:
+                sub_i += 1
+
     def sync_database(self, msg_cb=None):
         self.sync_topdir()
-        self.sync_files(msg_cb=msg_cb)
+        self.sync_files(self.extension_list, msg_cb=msg_cb)
+        self.mark_subtitle()
 
     def mod_topdir(self, topdir, newpath):
         newpath = os.path.abspath(newpath)

@@ -98,6 +98,7 @@ class MediaFile:
         self.abspath = os.path.join(topdir.abspath, reldir, filename)
         self.imagelist_index = None
         self.view_index = None
+        self.have_subtitle = False
 
     def load_dbtuple(self, t):
         self.id = t[0]
