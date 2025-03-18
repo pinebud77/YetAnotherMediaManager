@@ -402,11 +402,12 @@ class Catalog(list):
             thread_list.append(t)
             if count % cpu_count and count < total:
                 continue
-            msg_cb('Adding files : %s (%d/%d)' % (mf.filename, count, total))
 
             for t in thread_list:
                 t.join()
             thread_list = []
+
+            msg_cb('added files : %s (%d/%d)' % (mf.filename, count, total))
 
             if self.kill_thread:
                 return

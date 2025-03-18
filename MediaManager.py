@@ -600,11 +600,13 @@ class MediaManager(wx.Frame):
             files = self.catalog.filter(actors=self.leftPanel.actor_selected,
                                         tags=self.leftPanel.tag_selected,
                                         filename=self.leftPanel.file_filter)
+            self.filesList.Freeze()
             for mf in files:
                 if not (mf in self.files):
                     self.files.append(mf)
                     self.create_icon(mf)
                     self.add_mediafile(mf)
+            self.filesList.Thaw()
 
             mf_i = 0
             while mf_i < len(self.files):

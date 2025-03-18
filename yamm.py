@@ -18,7 +18,7 @@ from catalog import Catalog
 
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 801
+VERSION_MINOR = 802
 
 
 def wmain(yamm_file=None):
