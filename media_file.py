@@ -20,7 +20,7 @@ import io
 import os.path
 import logging
 from PIL import Image
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 
 from settings import *
 import database_utils as db_utils
@@ -87,6 +87,7 @@ class MediaFile:
         self.comment = None
         self.width = None
         self.height = None
+        self.play_count = 0
 
         self.catetory = None
         self.tag_list = []
@@ -112,9 +113,14 @@ class MediaFile:
         self.comment = t[8]
         self.width = t[9]
         self.height = t[10]
+        self.play_count = t[11]
 
     def set_lastplayed(self, dt):
         self.lastplay = dt
+        db_utils.update_file(self.catalog.db_conn, self)
+
+    def increment_play_count(self):
+        self.play_count += 1
         db_utils.update_file(self.catalog.db_conn, self)
 
     def get_resolution(self, dwidth, dheight, width, height):

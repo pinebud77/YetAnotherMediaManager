@@ -173,6 +173,7 @@ sql_create_file_table = """CREATE TABLE IF NOT EXISTS file (
                                 comment TEXT,
                                 width INTEGER,
                                 height INTEGER,
+                                playcount INTEGER DEFAULT 0,
                                 CONSTRAINT fk_topdir_id
                                     FOREIGN KEY (topdir_id)
                                     REFERENCES topdir(id)
@@ -186,7 +187,7 @@ def create_file_table(conn):
     commit_wait(conn)
 
 
-sql_get_file = """SELECT id, topdir_id, reldir, filename, size, time, lastplay, duration, comment, width, height
+sql_get_file = """SELECT id, topdir_id, reldir, filename, size, time, lastplay, duration, comment, width, height, playcount
                   FROM file
                   WHERE id >= ?;
                """
@@ -208,7 +209,8 @@ sql_update_file = """UPDATE file
                          duration=?,
                          comment=?,
                          width=?,
-                         height=?
+                         height=?,
+                         playcount=?
                      WHERE id=?;"""
 
 
@@ -224,6 +226,7 @@ def update_file(conn, mf):
                                 mf.comment,
                                 mf.width,
                                 mf.height,
+                                mf.play_count,
                                 mf.id,
                                 ))
     commit_wait(conn)
@@ -244,8 +247,8 @@ def set_file_id(conn, mf):
     mf.id = rows[0][0]
 
 
-sql_add_file = """INSERT INTO file (topdir_id, reldir, filename, size, time, lastplay, duration, comment, width, height)
-                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+sql_add_file = """INSERT INTO file (topdir_id, reldir, filename, size, time, lastplay, duration, comment, width, height, playcount)
+                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                """
 
 
@@ -253,7 +256,7 @@ def add_file_nocommit(conn, mf):
     c = conn.cursor()
     c.execute(sql_add_file, (mf.topdir.id, mf.reldir, mf.filename, mf.size,
                              mf.time, mf.lastplay, mf.duration, mf.comment,
-                             mf.width, mf.height))
+                             mf.width, mf.height, mf.play_count))
 
 
 sql_del_file = """DELETE FROM file

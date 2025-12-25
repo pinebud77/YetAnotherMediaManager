@@ -195,7 +195,7 @@ class MediaManager(wx.Frame):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnContentsRadio, self.fileRadio)
         ihbox.AddStretchSpacer()
         ihbox.Add(wx.StaticText(self, label='sort by :'), 0, wx.EXPAND)
-        sort_choices = ('Filename', 'Created Time', 'Last Played Time', 'Duration', 'Path', 'Size', 'Resolution')
+        sort_choices = ('Filename', 'Created Time', 'Last Played Time', 'Duration', 'Path', 'Size', 'Resolution', 'Play Count')
         self.sortChoice = wx.Choice(self, choices=sort_choices)
         self.sortChoice.SetSelection(self.sort_method)
         self.Bind(wx.EVT_CHOICE, self.OnSortChange, self.sortChoice)
@@ -428,6 +428,8 @@ class MediaManager(wx.Frame):
             self.filesList.SortItems(self.sort_size)
         elif self.sort_method == FILTER_SORT_RESOLUTION:
             self.filesList.SortItems(self.sort_resolution)
+        elif self.sort_method == FILTER_SORT_PLAYCOUNT:
+            self.filesList.SortItems(self.sort_play_count)
         else:
             logging.error('not a defined sorting method')
             self.sort_method = FILTER_SORT_PATH
@@ -456,7 +458,7 @@ class MediaManager(wx.Frame):
                 fav.view_index = self.favorites.index(fav)
 
         item = ULC.UltimateListItem()
-        item.SetAlign(wx.LIST_FORMAT_CENTER)
+        item.SetAlign(wx.LIST_FORMAT_LEFT)
 
         if self.view_contents == VIEW_FILES:
             item.SetId(mf.view_index)
@@ -466,7 +468,7 @@ class MediaManager(wx.Frame):
             if mf.have_subtitle:
                 item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
             item.SetData(mf.view_index)
-            self.filesList.InsertItem(item)
+            wx.CallAfter(self.filesList.InsertItem, item)
         else:
             for fav in mf.favorites:
                 item.SetId(fav.view_index)
@@ -476,7 +478,7 @@ class MediaManager(wx.Frame):
                 if mf.have_subtitle:
                     item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
                 item.SetData(fav.view_index)
-                self.filesList.InsertItem(item)
+                wx.CallAfter(self.filesList.InsertItem, item)
 
     def create_icon(self, mf):
         if self.view_contents == VIEW_FILES:
@@ -774,6 +776,15 @@ class MediaManager(wx.Frame):
             return -self.sort_positive
         else:
             return self.sort_positive
+    
+    def sort_play_count(self, item1, item2):
+        mf1, mf2 = self.sort_get_mf(item1, item2)
+        if mf1.play_count == mf2.play_count:
+            return 0
+        elif mf1.play_count < mf2.play_count:
+            return -self.sort_positive
+        else:
+            return self.sort_positive
 
     def sort_duration(self, item1, item2):
         mf1, mf2 = self.sort_get_mf(item1, item2)
@@ -921,6 +932,7 @@ class MediaManager(wx.Frame):
                     DEF_OPEN_SEEK % thumb[0])
         subprocess.Popen(run_list)
         self.file_last_selected.set_lastplayed(datetime.datetime.now())
+        self.file_last_selected.increment_play_count()
         self.rightPanel.set_mediafiles(self.files_selected)
 
     def OnFileDClick(self, e):
@@ -936,6 +948,7 @@ class MediaManager(wx.Frame):
                         DEF_OPEN_SEEK % self.favorite_last_selected.time)
             subprocess.Popen(run_list)
         self.file_last_selected.set_lastplayed(datetime.datetime.now())
+        self.file_last_selected.increment_play_count()
         self.rightPanel.set_mediafiles(self.files_selected)
 
     def OnFileEdit(self, e):

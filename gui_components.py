@@ -246,7 +246,7 @@ class RightPanel(wx.Panel):
     def InitUI(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        self.propertyList = wx.ListCtrl(self, size=(290, 145), style=wx.LC_REPORT |
+        self.propertyList = wx.ListCtrl(self, size=(290, 160), style=wx.LC_REPORT |
                                                                      wx.BORDER_SUNKEN |
                                                                      wx.LC_HRULES |
                                                                      wx.LC_VRULES)
@@ -258,7 +258,7 @@ class RightPanel(wx.Panel):
         self.propertyList.InsertItem(2, 'Resolution')
         self.propertyList.InsertItem(3, 'Size')
         self.propertyList.InsertItem(4, 'Duration')
-        self.propertyList.InsertItem(5, 'LastPlayed')
+        self.propertyList.InsertItem(5, 'PlayCount')
         self.set_property()
 
         vbox.Add(self.propertyList)
@@ -452,7 +452,7 @@ class RightPanel(wx.Panel):
             self.propertyList.SetItem(3, 1, '')
             self.propertyList.InsertItem(4, 'Duration')
             self.propertyList.SetItem(4, 1, '')
-            self.propertyList.InsertItem(5, 'LastPlayed')
+            self.propertyList.InsertItem(5, 'PlayCount')
             self.propertyList.SetItem(5, 1, '')
             return
 
@@ -480,11 +480,8 @@ class RightPanel(wx.Panel):
         else:
             self.propertyList.SetItem(4, 1, 'no info')
 
-        self.propertyList.InsertItem(5, 'LastPlayed')
-        if media_file.lastplay:
-            self.propertyList.SetItem(5, 1, str(media_file.lastplay))
-        else:
-            self.propertyList.SetItem(5, 1, '')
+        self.propertyList.InsertItem(5, 'PlayCount')
+        self.propertyList.SetItem(5, 1, str(media_file.play_count))
 
     def update_view(self):
         self.update_actor()

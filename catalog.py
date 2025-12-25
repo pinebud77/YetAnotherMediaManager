@@ -68,7 +68,6 @@ class Catalog(list):
     def open_database(self):
         try:
             self.db_conn = sqlite3.connect(self.filepath)
-            logging.info('sqlite3 version: ' + sqlite3.version)
         except Exception as e:
             logging.error('failed to open database file: %s' % self.filepath)
             logging.error('exception: %s' % e)
