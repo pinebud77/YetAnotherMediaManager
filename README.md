@@ -6,6 +6,9 @@ This is Video clip file manager. This is my personal project. No guarantee or ob
 Download Windows executable or tagged version
 * https://github.com/pinebud77/YetAnotherMediaManager_public/releases
 
+Installation
+* python3 -m pip install moviepy wxPython requests
+
 Features
 * File addition in background through thread
 * File management with database (sqlite3)
