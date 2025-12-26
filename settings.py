@@ -63,7 +63,7 @@ DEF_SMALL_RESOLUTION = (180, 102)
 DEF_MEDIUM_RESOLUTION = (240, 136)
 
 #mediafile settings
-DEF_FILE_EXTENSION = ('mkv', 'avi', 'mp4', 'asf', 'wmv', 'flv')
+DEF_FILE_EXTENSION = ('mkv', 'avi', 'mp4', 'asf', 'wmv', 'flv', 'mpg', 'mpeg', 'mov', 'rmvb', 'rm', 'ts', 'm2ts', '3gp', 'divx', 'vob')
 DEF_SUBTITLE_EXTENSION = ('sup', 'smi', 'ass', 'srt')
 DEF_MIN_IMAGE_COUNT = 5
 DEF_MAX_IMAGE_COUNT = 40

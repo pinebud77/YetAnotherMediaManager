@@ -449,6 +449,26 @@ class MediaManager(wx.Frame):
         else:
             logging.debug('sorting ascend changed to descend')
 
+    def insert_mf_item(self, mf, item):
+        if mf.imagelist_index is not None:
+            item.SetImage(mf.imagelist_index)
+        elif mf.icon_bmp is not None:
+            mf.imagelist_index = self.image_list.Add(mf.icon_bmp)
+            item.SetImage(mf.imagelist_index)
+        else:
+            logging.error('media file has no icon bitmap')
+        self.filesList.InsertItem(item)
+
+    def insert_fav_item(self, fav, item):
+        if fav.imagelist_index is not None:
+            item.SetImage(fav.imagelist_index)
+        elif fav.icon_bmp is not None:
+            fav.imagelist_index = self.image_list.Add(fav.icon_bmp)
+            item.SetImage(fav.imagelist_index)
+        else:
+            logging.error('favorite has no icon bitmap')
+        self.filesList.InsertItem(item)
+
     def add_mediafile(self, mf):
         if self.view_contents == VIEW_FILES:
             mf.view_index = self.files.index(mf)
@@ -463,22 +483,18 @@ class MediaManager(wx.Frame):
         if self.view_contents == VIEW_FILES:
             item.SetId(mf.view_index)
             item.SetText(mf.filename)
-            if mf.imagelist_index is not None:
-                item.SetImage(mf.imagelist_index)
             if mf.have_subtitle:
                 item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
             item.SetData(mf.view_index)
-            wx.CallAfter(self.filesList.InsertItem, item)
+            wx.CallAfter(self.insert_mf_item, mf, item)
         else:
             for fav in mf.favorites:
                 item.SetId(fav.view_index)
                 item.SetText(mf.filename)
-                if fav.imagelist_index is not None:
-                    item.SetImage(fav.imagelist_index)
                 if mf.have_subtitle:
                     item.SetFont(wx.Font(wx.FontInfo().Bold().Underlined()))
                 item.SetData(fav.view_index)
-                wx.CallAfter(self.filesList.InsertItem, item)
+                wx.CallAfter(self.insert_fav_item, fav, item)
 
     def create_icon(self, mf):
         if self.view_contents == VIEW_FILES:
@@ -490,8 +506,7 @@ class MediaManager(wx.Frame):
                 else:
                     image = wx.Image(DEF_THUMBNAIL_WIDTH, DEF_THUMBNAIL_HEIGHT)
                 image = self.get_scaled_image(self.image_list, image)
-                bmp = wx.Bitmap(image)
-                mf.imagelist_index = self.image_list.Add(bmp)
+                mf.icon_bmp = wx.Bitmap(image)
         else:
             for fav in mf.favorites:
                 if fav.imagelist_index is None:
@@ -502,8 +517,7 @@ class MediaManager(wx.Frame):
                     else:
                         image = wx.Image(DEF_THUMBNAIL_WIDTH, DEF_THUMBNAIL_HEIGHT)
                     image = self.get_scaled_image(self.image_list, image)
-                    bmp = wx.Bitmap(image)
-                    fav.imagelist_index = self.image_list.Add(bmp)
+                    fav.icon_bmp = wx.Bitmap(image)
 
     def mediaicon_create_func(self, mf_list):
         for mf in mf_list:

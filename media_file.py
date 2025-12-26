@@ -60,6 +60,7 @@ class Favorite:
         self.imagelist_index =None
         self.view_index = None
         self.jpg = None
+        self.icon_bmp = None
 
     def store(self):
         db_conn = self.mediafile.catalog.db_conn
@@ -100,6 +101,7 @@ class MediaFile:
         self.imagelist_index = None
         self.view_index = None
         self.have_subtitle = False
+        self.icon_bmp = None
 
     def load_dbtuple(self, t):
         self.id = t[0]
